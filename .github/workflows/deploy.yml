@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node
-        uses: actions/node-versions@v4
+        uses: actions/setup-node@v4 # 修正了这里：必须是 setup-node
         with:
           node-version: 20
 
@@ -27,5 +27,5 @@ jobs:
       - name: Deploy
         uses: jamesives/github-pages-deploy-action@v4
         with:
-          folder: dist # Vite 编译后的文件夹叫 dist
-          branch: gh-pages # 部署到这个分支
+          folder: dist
+          branch: gh-pages
