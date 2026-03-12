@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sylvia Ling Portfolio</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        then: '#4A5568',
+                        now: '#C4A77D',
+                        future: '#F5F5F5',
+                        'bg-deep': '#0A0A0A',
+                        'bg-charcoal': '#141414',
+                        'text-muted': '#737373',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-x': 'bounceX 1s infinite',
+                    },
+                    keyframes: {
+                        bounceX: {
+                            '0%, 100%': { transform: 'translateX(-25%)', 'animation-timing-function': 'cubic-bezier(0.8, 0, 1, 1)' },
+                            '50%': { transform: 'translateX(0)', 'animation-timing-function': 'cubic-bezier(0, 0, 0.2, 1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background-color: #0A0A0A;
+            color: white;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+        .text-gradient-now {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(to right, #C4A77D, white);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .animate-bounce-x {
+            animation: bounceX 1s infinite;
+        }
+        @keyframes bounceX {
+            0%, 100% { transform: translateX(-25%); }
+            50% { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body x-data="{ 
+    isScrolled: false, 
+    mobileMenuOpen: false, 
+    scrollProgress: 0,
+    activeWorkMode: {} 
+}" 
+x-init="
+    window.addEventListener('scroll', () => {
+        isScrolled = window.scrollY > 50;
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        scrollProgress = (window.scrollY / totalHeight) * 100;
+    });
+    lucide.createIcons();
+">
+
+    <!-- Navbar -->
+    <nav :class="isScrolled ? 'bg-bg-deep/80 backdrop-blur-lg border-b border-white/10 py-4' : 'bg-transparent py-6'" 
+         class="fixed top-0 left-0 w-full z-50 transition-all duration-500">
+        <!-- Scroll Progress Bar -->
+        <div class="absolute bottom-0 left-0 h-[2px] bg-now z-50 transition-all duration-100" :style="'width: ' + scrollProgress + '%'"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="#" class="text-2xl font-black tracking-tighter group flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-now flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <i data-lucide="zap" class="w-[18px] h-[18px] text-bg-deep"></i>
+                </div>
+                SYLVIA<span class="text-now">.</span>LING
+            </a>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#evolution" class="text-sm font-medium text-text-muted hover:text-white transition-colors relative group">
+                    进化史
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-now transition-all group-hover:w-full"></span>
+                </a>
+                <a href="#work" class="text-sm font-medium text-text-muted hover:text-white transition-colors relative group">
+                    项目集
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-now transition-all group-hover:w-full"></span>
+                </a>
+                <a href="#about" class="text-sm font-medium text-text-muted hover:text-white transition-colors relative group">
+                    关于
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-now transition-all group-hover:w-full"></span>
+                </a>
+                <a href="#contact" class="px-6 py-2.5 bg-now text-bg-deep text-sm font-bold rounded-full hover:scale-105 hover:shadow-[0_0_20px_rgba(196,167,125,0.4)] transition-all">
+                    联系我
+                </a>
+            </div>
+
+            <button class="md:hidden text-white w-10 h-10 flex items-center justify-center bg-white/5 rounded-lg" @click="mobileMenuOpen = !mobileMenuOpen">
+                <i x-show="!mobileMenuOpen" data-lucide="menu" class="w-5 h-5"></i>
+                <i x-show="mobileMenuOpen" data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="absolute top-full left-0 w-full bg-bg-charcoal border-b border-white/10 overflow-hidden md:hidden">
+            <div class="p-8 flex flex-col gap-6">
+                <a href="#evolution" class="text-2xl font-black tracking-tight hover:text-now transition-colors" @click="mobileMenuOpen = false">进化史</a>
+                <a href="#work" class="text-2xl font-black tracking-tight hover:text-now transition-colors" @click="mobileMenuOpen = false">项目集</a>
+                <a href="#about" class="text-2xl font-black tracking-tight hover:text-now transition-colors" @click="mobileMenuOpen = false">关于</a>
+                <a href="#contact" class="w-full py-4 bg-now text-bg-deep text-center font-bold rounded-2xl shadow-xl" @click="mobileMenuOpen = false">联系我</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-now/10 blur-[120px] rounded-full animate-pulse-slow"></div>
+            <div class="absolute bottom-1/4 -right-20 w-[400px] h-[400px] bg-then/10 blur-[100px] rounded-full"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10 w-full">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8">
+                        <span class="w-2 h-2 bg-now rounded-full animate-pulse"></span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-now">2025 Evolution Portfolio</span>
+                    </div>
+                    <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8">
+                        从人工精度<br/>
+                        <span class="text-gradient-now">到 AI 进化</span>
+                    </h1>
+                    <p class="text-xl text-text-muted max-w-lg mb-12 leading-relaxed">
+                        在 Hourglass、YSL、Dior 的实战中，我见证了业务逻辑的深度。现在，我正用 AI 重构这些逻辑，释放效率的无限可能。
+                    </p>
+                    <div class="flex flex-wrap gap-6">
+                        <a href="#work" class="px-8 py-4 bg-now text-bg-deep font-black rounded-2xl flex items-center gap-3 hover:scale-105 transition-all shadow-xl shadow-now/20">
+                            查看项目集 <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#evolution" class="px-8 py-4 bg-white/5 border border-white/10 font-black rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-all">
+                            进化历程
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="relative z-10 rounded-3xl overflow-hidden border border-white/10 shadow-2xl aspect-[4/5] md:aspect-square group">
+                        <img src="/halosylvia/assets/me-B6I5zj5H.JPG" alt="Sylvia Ling" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent opacity-60"></div>
+                        <div class="absolute bottom-8 left-8 right-8">
+                            <div class="glass-card p-6 border-white/20">
+                                <p class="text-xs font-black uppercase tracking-widest text-now mb-2">Current Focus</p>
+                                <p class="text-lg font-bold">AI Agent 业务流重构 & 自动化营销</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Decorative Elements -->
+                    <div class="absolute -top-6 -right-6 w-32 h-32 border-t-2 border-r-2 border-now/30 rounded-tr-3xl"></div>
+                    <div class="absolute -bottom-6 -left-6 w-32 h-32 border-b-2 border-l-2 border-now/30 rounded-bl-3xl"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Evolution Stages -->
+    <section id="evolution" class="py-32 bg-bg-charcoal/50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-20 text-center">
+                <h2 class="text-5xl font-black tracking-tighter mb-4">进化阶段</h2>
+                <div class="w-20 h-1.5 bg-now mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Then -->
+                <div class="glass-card p-10 border-then/20 hover:border-then/50 transition-all group">
+                    <div class="text-4xl font-black text-then mb-6">2024</div>
+                    <h3 class="text-2xl font-black mb-4">人工时代</h3>
+                    <p class="text-text-muted text-sm leading-relaxed mb-8">
+                        在 Hourglass、YSL、Dior，我学会了用人工精度打磨内容。手工时代 · 业务深耕。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-then/10 text-then text-[10px] font-bold rounded-full">KOL全流程</span>
+                        <span class="px-3 py-1 bg-then/10 text-then text-[10px] font-bold rounded-full">SQL数据分析</span>
+                        <span class="px-3 py-1 bg-then/10 text-then text-[10px] font-bold rounded-full">竞品研究</span>
+                    </div>
+                </div>
+                <!-- Now -->
+                <div class="glass-card p-10 border-now/40 bg-now/5 hover:border-now transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-now opacity-20"></i>
+                    </div>
+                    <div class="text-4xl font-black text-now mb-6">2025</div>
+                    <h3 class="text-2xl font-black mb-4">AI重构</h3>
+                    <p class="text-text-muted text-sm leading-relaxed mb-8">
+                        用AI重构每一个重复环节，把省下的时间还给策略与创意。AI重构 · 效率杠杆。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-now/20 text-now text-[10px] font-bold rounded-full">ChatGPT/Claude</span>
+                        <span class="px-3 py-1 bg-now/20 text-now text-[10px] font-bold rounded-full">Automation</span>
+                        <span class="px-3 py-1 bg-now/20 text-now text-[10px] font-bold rounded-full">Power BI</span>
+                    </div>
+                </div>
+                <!-- Future -->
+                <div class="glass-card p-10 border-white/5 hover:border-white/20 transition-all group">
+                    <div class="text-4xl font-black text-white/20 mb-6">FUTURE</div>
+                    <h3 class="text-2xl font-black mb-4">持续进化</h3>
+                    <p class="text-text-muted text-sm leading-relaxed mb-8">
+                        寻找下一个值得被AI优化的业务场景。持续进化 · 寻找下一个场景。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-white/5 text-white/40 text-[10px] font-bold rounded-full">AI视频生成</span>
+                        <span class="px-3 py-1 bg-white/5 text-white/40 text-[10px] font-bold rounded-full">多Agent协作</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work Cases -->
+    <section id="work" class="py-32">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-20">
+                <h2 class="text-5xl font-black tracking-tighter mb-4">项目集</h2>
+                <p class="text-text-muted">见证从传统工作流到 AI 驱动的效率进化</p>
+            </div>
+
+            <div class="space-y-40">
+                <!-- Case 1: KOL Audit -->
+                <div class="work-case" x-data="{ mode: 'THEN' }">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-8">
+                        <div class="relative">
+                            <h3 class="text-4xl font-black tracking-tighter mb-1">KOL内容审核系统</h3>
+                            <p class="text-text-muted text-sm font-medium tracking-wide uppercase">从30分钟/条到5分钟/条的进化</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-10 border-then/20 relative overflow-hidden" :class="mode === 'NOW' ? 'border-now/40 bg-now/5' : ''">
+                        <!-- Toggle -->
+                        <div class="flex flex-col items-center mb-12 relative">
+                            <div class="relative flex items-center bg-bg-deep/80 backdrop-blur-xl p-2 rounded-[24px] border border-white/20 shadow-xl">
+                                <button @click="mode = 'THEN'" 
+                                        :class="mode === 'THEN' ? 'bg-then text-white shadow-lg' : 'text-text-muted hover:text-white'"
+                                        class="relative z-10 px-10 py-4 rounded-[18px] text-[11px] font-black tracking-widest transition-all flex items-center gap-3">
+                                    <i data-lucide="clock" class="w-4 h-4"></i> 过去：手动时代
+                                </button>
+                                <button @click="mode = 'NOW'" 
+                                        :class="mode === 'NOW' ? 'bg-now text-bg-deep shadow-lg' : 'text-text-muted hover:text-white'"
+                                        class="relative z-10 px-10 py-4 rounded-[18px] text-[11px] font-black tracking-widest transition-all flex items-center gap-3">
+                                    <i data-lucide="zap" class="w-4 h-4"></i> 现在：AI 进化
+                                </button>
+                            </div>
+                            <div class="mt-4 flex items-center gap-2 text-[10px] font-black text-now uppercase tracking-[0.4em]">
+                                <i data-lucide="arrow-left-right" class="w-3 h-3 animate-bounce-x"></i> 点击切换 见证进化
+                            </div>
+                        </div>
+
+                        <div x-show="mode === 'THEN'" x-transition>
+                            <div class="grid lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-7">
+                                    <div class="mb-10">
+                                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4 flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 bg-then rounded-full"></div> 场景还原
+                                        </h4>
+                                        <p class="text-2xl font-medium text-white/90 leading-snug">"2025限定彩盘中国市场种草"</p>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-10">
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4">传统工作流</h4>
+                                            <ul class="space-y-4 text-sm text-text-muted">
+                                                <li class="flex gap-3"><span class="text-then font-mono">01</span> 理解核心卖点，沟通产品brief</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">02</span> 达人提交脚本，微信/邮件接收</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">03</span> 逐条阅读，标记问题</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">04</span> 撰写修改建议，反馈给达人</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4">痛点分析</h4>
+                                            <div class="space-y-3">
+                                                <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-text-muted">标准依赖个人经验，难以统一传承</div>
+                                                <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-text-muted">高频重复劳动，策略思考时间被挤压</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-5">
+                                    <div class="rounded-2xl overflow-hidden aspect-video border border-white/10 shadow-2xl">
+                                        <img src="/halosylvia/assets/hourglass-DYhajYeV.jpg" alt="Hourglass" class="w-full h-full object-cover">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="mode === 'NOW'" x-transition>
+                            <div class="grid lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-7">
+                                    <div class="mb-10">
+                                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-4 flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 bg-now rounded-full"></div> AI 重构逻辑
+                                        </h4>
+                                        <p class="text-2xl font-medium text-white/90 leading-snug">"基于业务经验，用 AI 重构审核流程"</p>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-10">
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-4">AI 协作流</h4>
+                                            <ul class="space-y-4 text-sm text-text-muted">
+                                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-now"></i> 批量导入脚本</li>
+                                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-now"></i> AI 自动评分</li>
+                                                <li class="flex gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-now"></i> 人工复核低分内容</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-4">效率提升</h4>
+                                            <div class="p-6 bg-now/10 rounded-2xl border border-now/20 text-center">
+                                                <div class="text-4xl font-black text-now mb-2">6倍</div>
+                                                <div class="text-[10px] text-text-muted uppercase tracking-widest">效率增幅</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-5">
+                                    <div class="p-8 bg-now/5 rounded-2xl border border-now/10">
+                                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-6">评分维度雷达图</h4>
+                                        <div id="radar-chart-1" class="h-64 w-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 2: Competitor Monitor -->
+                <div class="work-case" x-data="{ mode: 'THEN' }">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-8">
+                        <div class="relative">
+                            <h3 class="text-4xl font-black tracking-tighter mb-1">竞品监测引擎</h3>
+                            <p class="text-text-muted text-sm font-medium tracking-wide uppercase">从手动整理到AI实时洞察</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-10 border-then/20 relative overflow-hidden" :class="mode === 'NOW' ? 'border-now/40 bg-now/5' : ''">
+                        <!-- Toggle -->
+                        <div class="flex flex-col items-center mb-12 relative">
+                            <div class="relative flex items-center bg-bg-deep/80 backdrop-blur-xl p-2 rounded-[24px] border border-white/20 shadow-xl">
+                                <button @click="mode = 'THEN'" 
+                                        :class="mode === 'THEN' ? 'bg-then text-white shadow-lg' : 'text-text-muted hover:text-white'"
+                                        class="relative z-10 px-10 py-4 rounded-[18px] text-[11px] font-black tracking-widest transition-all flex items-center gap-3">
+                                    <i data-lucide="clock" class="w-4 h-4"></i> 过去：手动时代
+                                </button>
+                                <button @click="mode = 'NOW'" 
+                                        :class="mode === 'NOW' ? 'bg-now text-bg-deep shadow-lg' : 'text-text-muted hover:text-white'"
+                                        class="relative z-10 px-10 py-4 rounded-[18px] text-[11px] font-black tracking-widest transition-all flex items-center gap-3">
+                                    <i data-lucide="zap" class="w-4 h-4"></i> 现在：AI 进化
+                                </button>
+                            </div>
+                        </div>
+
+                        <div x-show="mode === 'THEN'" x-transition>
+                            <div class="grid lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-7">
+                                    <div class="mb-10">
+                                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4 flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 bg-then rounded-full"></div> 场景还原
+                                        </h4>
+                                        <p class="text-2xl font-medium text-white/90 leading-snug">"每月输出竞品与内容趋势报告"</p>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-10">
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4">传统工作流</h4>
+                                            <ul class="space-y-4 text-sm text-text-muted">
+                                                <li class="flex gap-3"><span class="text-then font-mono">01</span> 手动浏览小红书、抖音截图</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">02</span> Excel 记录互动数据</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">03</span> PPT 整理分析提炼规律</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4">痛点分析</h4>
+                                            <div class="space-y-3">
+                                                <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-text-muted">手动采集，覆盖面有限</div>
+                                                <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-text-muted">报告制作，重复排版</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-5">
+                                    <div class="rounded-2xl overflow-hidden aspect-video border border-white/10 shadow-2xl">
+                                        <img src="/halosylvia/assets/com-Bt4rQrPQ.JPG" alt="Competitor Monitor" class="w-full h-full object-cover">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="mode === 'NOW'" x-transition>
+                            <div class="grid lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-12">
+                                    <!-- PowerBI Mockup -->
+                                    <div class="w-full h-[500px] bg-[#F3F2F1] rounded-lg overflow-hidden flex flex-col border border-gray-200 shadow-2xl">
+                                        <div class="h-8 bg-[#111] flex items-center px-3 justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
+                                                <span class="text-[10px] text-white font-medium">Power BI Desktop - Competitor_Insights_v2.pbix</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 flex overflow-hidden">
+                                            <div class="w-10 bg-white border-r border-gray-200 flex flex-col items-center py-4 gap-4">
+                                                <div class="w-6 h-6 bg-yellow-500/10 rounded flex items-center justify-center text-yellow-600"><i data-lucide="bar-chart-2" class="w-3 h-3"></i></div>
+                                                <div class="w-6 h-6 text-gray-400 flex items-center justify-center"><i data-lucide="layout" class="w-3 h-3"></i></div>
+                                            </div>
+                                            <div class="flex-1 p-6 bg-[#F3F2F1] overflow-auto">
+                                                <div class="flex justify-between items-center mb-6">
+                                                    <h2 class="text-sm font-black text-gray-800 uppercase tracking-tighter">Competitor Price Index Dashboard</h2>
+                                                    <div class="flex gap-2">
+                                                        <div class="px-3 py-1 bg-white border border-gray-200 rounded text-[8px] text-gray-500">Filter: All Regions</div>
+                                                    </div>
+                                                </div>
+                                                <div class="grid grid-cols-3 gap-4 mb-6">
+                                                    <div class="bg-white p-4 rounded shadow-sm border border-gray-100">
+                                                        <p class="text-[8px] text-gray-400 uppercase font-bold mb-1">Total Competitors</p>
+                                                        <p class="text-2xl font-black text-gray-800">124</p>
+                                                        <p class="text-[8px] text-green-500 flex items-center gap-1 mt-1"><i data-lucide="arrow-up-right" class="w-2 h-2"></i> +12% vs LW</p>
+                                                    </div>
+                                                    <div class="bg-white p-4 rounded shadow-sm border border-gray-100">
+                                                        <p class="text-[8px] text-gray-400 uppercase font-bold mb-1">Avg Price Index</p>
+                                                        <p class="text-2xl font-black text-gray-800">0.92</p>
+                                                        <p class="text-[8px] text-red-500 flex items-center gap-1 mt-1"><i data-lucide="arrow-down-right" class="w-2 h-2"></i> -3% vs LW</p>
+                                                    </div>
+                                                    <div class="bg-white p-4 rounded shadow-sm border border-gray-100">
+                                                        <p class="text-[8px] text-gray-400 uppercase font-bold mb-1">Market Share</p>
+                                                        <p class="text-2xl font-black text-gray-800">18.4%</p>
+                                                        <p class="text-[8px] text-green-500 flex items-center gap-1 mt-1"><i data-lucide="arrow-up-right" class="w-2 h-2"></i> +1.2% vs LW</p>
+                                                    </div>
+                                                </div>
+                                                <div class="bg-white p-6 rounded shadow-sm border border-gray-100 h-64">
+                                                    <div id="line-chart-1" class="w-full h-full"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 3: Data Assistant -->
+                <div class="work-case" x-data="{ mode: 'THEN' }">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-8">
+                        <div class="relative">
+                            <h3 class="text-4xl font-black tracking-tighter mb-1">数据复盘助手</h3>
+                            <p class="text-text-muted text-sm font-medium tracking-wide uppercase">从SQL查询到自然语言洞察</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-10 border-then/20 relative overflow-hidden" :class="mode === 'NOW' ? 'border-now/40 bg-now/5' : ''">
+                        <!-- Toggle -->
+                        <div class="flex flex-col items-center mb-12 relative">
+                            <div class="relative flex items-center bg-bg-deep/80 backdrop-blur-xl p-2 rounded-[24px] border border-white/20 shadow-xl">
+                                <button @click="mode = 'THEN'" 
+                                        :class="mode === 'THEN' ? 'bg-then text-white shadow-lg' : 'text-text-muted hover:text-white'"
+                                        class="relative z-10 px-10 py-4 rounded-[18px] text-[11px] font-black tracking-widest transition-all flex items-center gap-3">
+                                    <i data-lucide="clock" class="w-4 h-4"></i> 过去：手动时代
+                                </button>
+                                <button @click="mode = 'NOW'" 
+                                        :class="mode === 'NOW' ? 'bg-now text-bg-deep shadow-lg' : 'text-text-muted hover:text-white'"
+                                        class="relative z-10 px-10 py-4 rounded-[18px] text-[11px] font-black tracking-widest transition-all flex items-center gap-3">
+                                    <i data-lucide="zap" class="w-4 h-4"></i> 现在：AI 进化
+                                </button>
+                            </div>
+                        </div>
+
+                        <div x-show="mode === 'THEN'" x-transition>
+                            <div class="grid lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-7">
+                                    <div class="mb-10">
+                                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4 flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 bg-then rounded-full"></div> 场景还原
+                                        </h4>
+                                        <p class="text-2xl font-medium text-white/90 leading-snug">"全年15+ campaign投放数据复盘"</p>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-10">
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4">传统工作流</h4>
+                                            <ul class="space-y-4 text-sm text-text-muted">
+                                                <li class="flex gap-3"><span class="text-then font-mono">01</span> SQL 查询提取数据</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">02</span> Excel 透视计算互动率</li>
+                                                <li class="flex gap-3"><span class="text-then font-mono">03</span> 人工分析提炼建议</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-then mb-4">痛点分析</h4>
+                                            <div class="space-y-3">
+                                                <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-text-muted">SQL 编写耗时</div>
+                                                <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs text-text-muted">人工分析主观性强</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-5">
+                                    <div class="w-full h-full bg-[#0D0D0D] rounded-xl overflow-hidden flex flex-col border border-white/10 shadow-2xl font-mono">
+                                        <div class="h-10 bg-[#1A1A1A] flex items-center px-4 justify-between border-b border-white/5">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex gap-1.5">
+                                                    <div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+                                                    <div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+                                                    <div class="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+                                                </div>
+                                                <span class="text-[10px] text-gray-500 ml-3 font-bold tracking-widest uppercase">manual_query.sql</span>
+                                            </div>
+                                        </div>
+                                        <div class="p-5 text-[10px] text-gray-400 space-y-1">
+                                            <p><span class="text-[#569CD6]">SELECT</span></p>
+                                            <p class="pl-4">t1.user_id,</p>
+                                            <p class="pl-4">t1.order_date,</p>
+                                            <p class="pl-4"><span class="text-[#DCDCAA]">SUM</span>(t1.amount) <span class="text-[#569CD6]">AS</span> daily_total</p>
+                                            <p><span class="text-[#569CD6]">FROM</span> orders t1</p>
+                                            <p><span class="text-[#569CD6]">WHERE</span> t1.order_date > <span class="text-[#CE9178]">'2024-01-01'</span></p>
+                                            <p><span class="text-[#569CD6]">GROUP BY</span> 1, 2</p>
+                                            <p><span class="text-[#569CD6]">ORDER BY</span> 2 <span class="text-[#569CD6]">DESC</span>;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="mode === 'NOW'" x-transition>
+                            <div class="grid lg:grid-cols-12 gap-12">
+                                <div class="lg:col-span-7">
+                                    <div class="mb-10">
+                                        <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-4 flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 bg-now rounded-full"></div> AI 重构逻辑
+                                        </h4>
+                                        <p class="text-2xl font-medium text-white/90 leading-snug">"从 SQL 查询到自然语言洞察"</p>
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-10">
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-4">AI 协作流</h4>
+                                            <ul class="space-y-4 text-sm text-text-muted">
+                                                <li class="flex gap-3"><i data-lucide="zap" class="w-4 h-4 text-now"></i> 需求描述</li>
+                                                <li class="flex gap-3"><i data-lucide="zap" class="w-4 h-4 text-now"></i> AI 生成 SQL</li>
+                                                <li class="flex gap-3"><i data-lucide="zap" class="w-4 h-4 text-now"></i> AI 数据解读</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-now mb-4">效率提升</h4>
+                                            <div class="p-6 bg-now/10 rounded-2xl border border-now/20 text-center">
+                                                <div class="text-4xl font-black text-now mb-2">4.7倍</div>
+                                                <div class="text-[10px] text-text-muted uppercase tracking-widest">效率增幅</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-5">
+                                    <div class="w-full h-full bg-[#0D0D0D] rounded-xl overflow-hidden flex flex-col border border-white/10 shadow-2xl font-mono">
+                                        <div class="h-10 bg-[#1A1A1A] flex items-center px-4 justify-between border-b border-white/5">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 rounded-full bg-now"></div>
+                                                <span class="text-[10px] text-now ml-3 font-bold tracking-widest uppercase">ai_data_assistant.sh</span>
+                                            </div>
+                                        </div>
+                                        <div class="p-5 space-y-4" x-data="{ 
+                                            typedText: '', 
+                                            fullText: '正在分析上周美妆产品销售趋势...\n已为您生成 SQL 查询代码：',
+                                            showSql: false,
+                                            init() {
+                                                let i = 0;
+                                                const interval = setInterval(() => {
+                                                    this.typedText = this.fullText.slice(0, i);
+                                                    i++;
+                                                    if (i > this.fullText.length) {
+                                                        clearInterval(interval);
+                                                        setTimeout(() => this.showSql = true, 500);
+                                                    }
+                                                }, 30);
+                                            }
+                                        }">
+                                            <div class="flex gap-3">
+                                                <div class="w-6 h-6 rounded bg-white/5 flex items-center justify-center text-[10px] text-text-muted shrink-0"><i data-lucide="user" class="w-3 h-3"></i></div>
+                                                <div class="bg-white/5 p-3 rounded-lg text-[10px] text-white/70">分析上周上海地区美妆销售趋势。</div>
+                                            </div>
+                                            <div class="flex gap-3">
+                                                <div class="w-6 h-6 rounded bg-now flex items-center justify-center text-bg-deep shrink-0"><i data-lucide="zap" class="w-3 h-3"></i></div>
+                                                <div class="bg-now/5 p-3 rounded-lg text-[10px] text-now">
+                                                    <p class="whitespace-pre-wrap mb-2" x-text="typedText"></p>
+                                                    <div x-show="showSql" x-transition class="mt-2 p-3 bg-black/40 rounded border border-now/10 font-mono text-[8px] text-now/80">
+                                                        <pre>SELECT region, SUM(sales) 
+FROM beauty_products
+WHERE region = '上海'
+GROUP BY region;</pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-32 bg-bg-charcoal/30">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-20 items-center">
+                <div class="relative">
+                    <div class="aspect-square rounded-3xl overflow-hidden border border-white/10">
+                        <img src="/halosylvia/assets/me-B6I5zj5H.JPG" alt="Sylvia Ling" class="w-full h-full object-cover grayscale">
+                    </div>
+                    <div class="absolute -bottom-10 -right-10 glass-card p-10 border-now/20">
+                        <div class="text-5xl font-black text-now mb-2">3+</div>
+                        <p class="text-xs font-black uppercase tracking-widest text-text-muted">Years Experience</p>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-5xl font-black tracking-tighter mb-8">关于我</h2>
+                    <p class="text-xl text-text-muted leading-relaxed mb-8">
+                        我是一名深耕美妆行业的市场营销专家，曾服务于 Hourglass、YSL、Dior 等顶尖品牌。我不仅懂品牌调性与业务逻辑，更热衷于探索如何利用 AI 技术重构传统工作流。
+                    </p>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-now font-black uppercase tracking-widest text-xs mb-4">Core Skills</h4>
+                            <ul class="space-y-2 text-sm text-text-muted">
+                                <li>KOL Marketing</li>
+                                <li>Data Analysis (SQL)</li>
+                                <li>Localization</li>
+                                <li>AI Workflow Design</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-now font-black uppercase tracking-widest text-xs mb-4">Brands Served</h4>
+                            <ul class="space-y-2 text-sm text-text-muted">
+                                <li>HOURGLASS</li>
+                                <li>SAINT LAURENT</li>
+                                <li>DIOR</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-32">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <h2 class="text-6xl font-black tracking-tighter mb-8">准备好开启<br/><span class="text-gradient-now">进化之旅了吗？</span></h2>
+            <p class="text-xl text-text-muted mb-12">如果您对 AI 业务重构或市场营销有任何想法，欢迎随时联系我。</p>
+            
+            <div class="flex flex-col md:flex-row gap-6 justify-center">
+                <a href="mailto:sy.ing030201@gmail.com" class="flex items-center justify-center gap-3 px-8 py-4 glass-card border-white/10 hover:border-now transition-all group">
+                    <i data-lucide="mail" class="w-5 h-5 text-now"></i>
+                    <span class="font-bold">sy.ing030201@gmail.com</span>
+                </a>
+                <div class="flex items-center justify-center gap-3 px-8 py-4 glass-card border-white/10">
+                    <i data-lucide="phone" class="w-5 h-5 text-now"></i>
+                    <span class="font-bold">Contact via Email</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="text-text-muted text-sm">© 2025 Sylvia Ling. All rights reserved.</p>
+            <div class="flex gap-8">
+                <a href="#" class="text-text-muted hover:text-now transition-colors"><i data-lucide="globe" class="w-5 h-5"></i></a>
+                <a href="#" class="text-text-muted hover:text-now transition-colors"><i data-lucide="zap" class="w-5 h-5"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Charts when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initRadarChart('radar-chart-1');
+            initLineChart('line-chart-1');
+        });
+
+        function initRadarChart(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const margin = 40;
+            const radius = Math.min(width, height) / 2 - margin;
+
+            const data = [
+                { axis: "卖点覆盖", value: 0.8 },
+                { axis: "平台适配", value: 0.9 },
+                { axis: "情感真诚", value: 0.75 },
+                { axis: "互动引导", value: 0.85 },
+                { axis: "合规安全", value: 0.95 }
+            ];
+
+            const svg = d3.select("#" + containerId)
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2}, ${height/2})`);
+
+            const angleSlice = Math.PI * 2 / data.length;
+            const rScale = d3.scaleLinear().range([0, radius]).domain([0, 1]);
+
+            // Draw Background Circles
+            const levels = 5;
+            for (let j = 0; j < levels; j++) {
+                const levelRadius = radius * (j + 1) / levels;
+                svg.append("circle")
+                    .attr("r", levelRadius)
+                    .attr("fill", "none")
+                    .attr("stroke", "rgba(255,255,255,0.05)")
+                    .attr("stroke-width", 1);
+            }
+
+            // Draw Axes
+            const axis = svg.selectAll(".axis")
+                .data(data)
+                .enter()
+                .append("g")
+                .attr("class", "axis");
+
+            axis.append("line")
+                .attr("x1", 0)
+                .attr("y1", 0)
+                .attr("x2", (d, i) => rScale(1) * Math.cos(angleSlice * i - Math.PI/2))
+                .attr("y2", (d, i) => rScale(1) * Math.sin(angleSlice * i - Math.PI/2))
+                .attr("stroke", "rgba(255,255,255,0.1)")
+                .attr("stroke-width", 1);
+
+            axis.append("text")
+                .attr("class", "legend")
+                .style("font-size", "8px")
+                .style("fill", "#737373")
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.35em")
+                .attr("x", (d, i) => rScale(1.2) * Math.cos(angleSlice * i - Math.PI/2))
+                .attr("y", (d, i) => rScale(1.2) * Math.sin(angleSlice * i - Math.PI/2))
+                .text(d => d.axis);
+
+            // Draw Radar Area
+            const radarLine = d3.lineRadial()
+                .radius(d => rScale(d.value))
+                .angle((d, i) => i * angleSlice)
+                .curve(d3.curveLinearClosed);
+
+            svg.append("path")
+                .datum(data)
+                .attr("d", radarLine)
+                .attr("fill", "rgba(196, 167, 125, 0.3)")
+                .attr("stroke", "#C4A77D")
+                .attr("stroke-width", 2);
+        }
+
+        function initLineChart(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const margin = {top: 20, right: 20, bottom: 30, left: 40};
+
+            const data = [
+                { day: 'Mon', comp: 40, self: 24 },
+                { day: 'Tue', comp: 30, self: 13 },
+                { day: 'Wed', comp: 20, self: 98 },
+                { day: 'Thu', comp: 27, self: 39 },
+                { day: 'Fri', comp: 18, self: 48 },
+                { day: 'Sat', comp: 23, self: 38 },
+                { day: 'Sun', comp: 34, self: 43 }
+            ];
+
+            const svg = d3.select("#" + containerId)
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+            const x = d3.scalePoint()
+                .domain(data.map(d => d.day))
+                .range([0, width - margin.left - margin.right]);
+
+            const y = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height - margin.top - margin.bottom, 0]);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
+                .call(d3.axisBottom(x).tickSize(0).tickPadding(10))
+                .call(g => g.select(".domain").remove())
+                .selectAll("text")
+                .style("font-size", "8px")
+                .style("fill", "#999");
+
+            // Add Area
+            const area = d3.area()
+                .x(d => x(d.day))
+                .y0(height - margin.top - margin.bottom)
+                .y1(d => y(d.comp))
+                .curve(d3.curveMonotoneX);
+
+            svg.append("path")
+                .datum(data)
+                .attr("fill", "rgba(242, 200, 17, 0.2)")
+                .attr("d", area);
+
+            // Add Lines
+            const lineComp = d3.line()
+                .x(d => x(d.day))
+                .y(d => y(d.comp))
+                .curve(d3.curveMonotoneX);
+
+            const lineSelf = d3.line()
+                .x(d => x(d.day))
+                .y(d => y(d.self))
+                .curve(d3.curveMonotoneX);
+
+            svg.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", "#F2C811")
+                .attr("stroke-width", 2)
+                .attr("d", lineComp);
+
+            svg.append("path")
+                .datum(data)
+                .attr("fill", "none")
+                .attr("stroke", "#111")
+                .attr("stroke-width", 2)
+                .attr("d", lineSelf);
+        }
+    </script>
+</body>
+</html>
